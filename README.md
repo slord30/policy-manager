@@ -1,3 +1,20 @@
+## PolicyManager
+
+## Team Members
+* **Sarah Lord**
+* **Teniece Busenbark**
+* **Segundo Demetrio Alvarez Vilca**
+* **Reese Blignaut** 
+
+## Tech Stack
+* **Framework:** Next.js 15 (App Router)
+* **Language:** TypeScript
+* **Styling:** Tailwind CSS
+* **Database:** Supabase / MongoDB (Pending Implementation)
+* **Authentication:** Clerk / Auth.js v5 (Pending Implementation)
+
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
