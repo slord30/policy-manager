@@ -1,3 +1,5 @@
+// src/app/page.tsx
+
 export default function Home() {
   return (
     <main className="max-w-7xl mx-auto p-6 space-y-6">
@@ -42,3 +44,5 @@ export default function Home() {
     </main>
   );
 }
+
+
