@@ -1,3 +1,5 @@
+import DetailField from '@/components/DetailField';
+
 export default function PolicyDetailPage() {
   const policy = {
     policyNumber: 'AUTO-123456',
@@ -44,25 +46,16 @@ export default function PolicyDetailPage() {
         </h2>
 
         <div className="grid gap-6 md:grid-cols-2">
-          <div>
-            <h3 className="font-medium">Client</h3>
-            <p>{policy.client}</p>
-          </div>
-
-          <div>
-            <h3 className="font-medium">Carrier</h3>
-            <p>{policy.carrier}</p>
-          </div>
-
-          <div>
-            <h3 className="font-medium">Policy Number</h3>
-            <p>{policy.policyNumber}</p>
-          </div>
-
-          <div>
-            <h3 className="font-medium">Line of Business</h3>
-            <p>{policy.lineOfBusiness}</p>
-          </div>
+          <DetailField label="Client" value={policy.client} />
+          <DetailField label="Carrier" value={policy.carrier} />
+          <DetailField
+            label="Policy Number"
+            value={policy.policyNumber}
+          />
+          <DetailField
+            label="Line of Business"
+            value={policy.lineOfBusiness}
+          />
         </div>
       </section>
 
@@ -72,15 +65,14 @@ export default function PolicyDetailPage() {
         </h2>
 
         <div className="grid gap-6 md:grid-cols-2">
-          <div>
-            <h3 className="font-medium">Effective Date</h3>
-            <p>{policy.effectiveDate}</p>
-          </div>
-
-          <div>
-            <h3 className="font-medium">Expiration Date</h3>
-            <p>{policy.expirationDate}</p>
-          </div>
+          <DetailField
+            label="Effective Date"
+            value={policy.effectiveDate}
+          />
+          <DetailField
+            label="Expiration Date"
+            value={policy.expirationDate}
+          />
         </div>
       </section>
 
@@ -90,20 +82,15 @@ export default function PolicyDetailPage() {
         </h2>
 
         <div className="grid gap-6 md:grid-cols-3">
-          <div>
-            <h3 className="font-medium">Premium</h3>
-            <p>{policy.premium}</p>
-          </div>
-
-          <div>
-            <h3 className="font-medium">Payment Frequency</h3>
-            <p>{policy.paymentFrequency}</p>
-          </div>
-
-          <div>
-            <h3 className="font-medium">Payment Status</h3>
-            <p>{policy.paymentStatus}</p>
-          </div>
+          <DetailField label="Premium" value={policy.premium} />
+          <DetailField
+            label="Payment Frequency"
+            value={policy.paymentFrequency}
+          />
+          <DetailField
+            label="Payment Status"
+            value={policy.paymentStatus}
+          />
         </div>
       </section>
 
@@ -112,11 +99,11 @@ export default function PolicyDetailPage() {
           Coverage Status
         </h2>
 
-        <div>
-          <h3 className="font-medium">Current Status</h3>
-          <p>{policy.coverageStatus}</p>
-        </div>
+        <DetailField
+          label="Current Status"
+          value={policy.coverageStatus}
+        />
       </section>
     </main>
   );
-}   
+}
