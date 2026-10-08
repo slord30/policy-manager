@@ -5,28 +5,24 @@ import { sql } from '@/lib/db';
 
 export async function getDashboardMetrics() {
   try {
-    // FIX: Added 'app.' prefix to target your clean schema folder
     const clientsResult =
       (await sql`SELECT COUNT(*)::int AS count FROM app.clients`) as Array<{
         count: number;
       }>;
     const totalClients = clientsResult[0]?.count ?? 0;
 
-    // FIX: Added 'app.' prefix to target your clean schema folder
     const policiesResult =
       (await sql`SELECT COUNT(*)::int AS count FROM app.policies WHERE status = 'ACTIVE'`) as Array<{
         count: number;
       }>;
     const activePolicies = policiesResult[0]?.count ?? 0;
 
-    // FIX: Added 'app.' prefix to target your clean schema folder
     const expirationResult = (await sql`
       SELECT COUNT(*)::int AS count FROM app.policies 
       WHERE expiration_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '30 days'
     `) as Array<{ count: number }>;
     const expiring30Days = expirationResult[0]?.count ?? 0;
 
-    // FIX: Added 'app.' prefix to target your clean schema folder
     const premiumResult =
       (await sql`SELECT SUM(premium)::float AS sum FROM app.policies`) as Array<{
         sum: number;
@@ -62,13 +58,14 @@ export async function getDashboardMetrics() {
 
 export async function getUpcomingRenewals() {
   try {
-    // This function is perfectly correct! It accurately uses your clean folder schemas
+    // FIX: Joined your new app.carriers table using carrier_id
     const rows = await sql`
-      SELECT p.id, c.name as client, p.carrier, p.policy_number as "policyNum", 
+      SELECT p.id, c.name as client, car.name as carrier, p.policy_number as "policyNum", 
              TO_CHAR(p.expiration_date, 'Mon DD, YYYY') as date, 
              TO_CHAR(p.premium, '$9,999,999') as premium
       FROM app.policies p
       JOIN app.clients c ON p.client_id = c.id
+      JOIN app.carriers car ON p.carrier_id = car.id
       WHERE p.expiration_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '30 days'
       ORDER BY p.expiration_date ASC
       LIMIT 5
