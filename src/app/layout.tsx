@@ -1,6 +1,8 @@
+// src/app/layout.tsx - Root layout for the PolicyManager CRM application
+
 import type { Metadata } from 'next';
 import './globals.css';
-import Navbar from '@/components/Navbar';
+import Header from '@/components/Header'; // Swapped Navbar wrapper out for Header
 import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
@@ -16,8 +18,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen flex flex-col antialiased bg-background text-text-main">
-        {/* Render your unified bar layout */}
-        <Navbar />
+        {/* Render your unified header layout shell */}
+        <Header />
         
         <div className="flex-1">
           {children}
