@@ -1,29 +1,23 @@
-// src/components/Header.tsx
 import Link from 'next/link';
+import { auth } from '@/auth';
 import Navbar from './Navbar';
+import SignOutButton from './SignOutButton';
 
-export default function Header() {
+export default async function Header() {
+  const session = await auth();
+
   return (
-    <header className="w-full bg-surface border-b border-border sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        
-        <Link 
-          href="/" 
-          className="flex items-center space-x-2 group hover:opacity-90 transition-opacity"
-        >
-          <span className="text-xl font-bold text-primary tracking-widest uppercase">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-surface">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4">
+        <Link href="/" className="flex items-center space-x-2">
+          <span className="text-xl font-bold uppercase tracking-widest text-primary">
             POLICYMANAGER
           </span>
         </Link>
 
         <Navbar />
 
-        {/* Action Button */}
-        <div>
-          <Link href="/policies#new-policy" className="bg-primary hover:bg-opacity-90 text-white px-4 py-2 rounded-md text-sm font-medium transition-all shadow-xs cursor-pointer uppercase tracking-wider">
-            Add New Policy
-          </Link>
-        </div>
+        {session?.user && <SignOutButton />}
       </div>
     </header>
   );

@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import StatCard from '@/components/StatCard';
 import { getDashboardMetrics, getUpcomingRenewals } from './actions';
+import DateTime from '@/components/DateTime';
 
 export const metadata: Metadata = {
   title: 'Dashboard | PolicyManager',
@@ -28,14 +29,18 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* Upper Dashboard Heading Section */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-wider text-text-main uppercase">
-          OVERVIEW DASHBOARD
-        </h1>
-        <p className="text-sm text-text-muted mt-1">
-          Aggregated client portfolio metrics running directly on your Neon database instance.
-        </p>
-      </div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+  <div>
+    <h1 className="text-2xl font-bold tracking-wider text-text-main uppercase">
+      OVERVIEW DASHBOARD
+    </h1>
+    <p className="mt-1 text-sm text-text-muted">
+        A quick view of your clients, policies, and upcoming renewals.
+    </p>
+  </div>
+
+  <DateTime />
+</div>
 
       {/* Grid of Live StatCards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -43,18 +48,21 @@ export default async function DashboardPage() {
           title="Total Clients" 
           value={metrics.totalClients} 
           description="Total independent broker accounts tracked" 
+          href="/clients"
           iconColor="text-primary"
         />
         <StatCard 
           title="Active Policies" 
           value={metrics.activePolicies} 
           description="Live coverage instances across networks" 
+          href="/policies"
           iconColor="text-blue-400"
         />
         <StatCard 
           title="Expiring (30 Days)" 
           value={metrics.expiring30Days} 
           description="High-priority upcoming renewals" 
+          href="/renewals"
           iconColor="text-amber-400"
         />
         <StatCard 
@@ -87,40 +95,28 @@ export default async function DashboardPage() {
                 </div>
               ) : (
                 upcomingRenewals.map((policy) => (
-                    <Link key={policy.id} href={`/policies/${policy.id}`} className="p-4 flex items-center justify-between hover:bg-slate-900/10 transition-colors">
-                    <div>
-                      <p className="text-sm font-semibold text-text-main">{policy.client}</p>
-                      <div className="flex gap-2 text-xs text-text-muted mt-0.5">
-                        <span className="uppercase tracking-wider font-medium text-primary">{policy.carrier}</span>
-                        <span>•</span>
-                        <span>#{policy.policyNum}</span>
-                      </div>
-                    </Link>
-                    <div className="text-right">
-                      <p className="text-sm font-medium text-amber-400 font-mono">{policy.date}</p>
-                      <p className="text-xs text-text-muted mt-0.5">{policy.premium} PREMIUM</p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
+  <div
+    key={policy.id}
+    className="p-4 flex items-center justify-between hover:bg-slate-900/10 transition-colors"
+  >
+    <Link href={`/policies/${policy.id}`} className="min-w-0 flex-1">
+      <p className="text-sm font-semibold text-text-main">{policy.client}</p>
+      <div className="flex gap-2 text-xs text-text-muted mt-0.5">
+        <span className="uppercase tracking-wider font-medium text-primary">
+          {policy.carrier}
+        </span>
+        <span>•</span>
+        <span>#{policy.policyNum}</span>
+      </div>
+    </Link>
 
-        {/* System Utility Sidebar */}
-        <div className="bg-surface border border-border p-6 rounded-xl h-fit">
-          <h4 className="text-xs font-bold tracking-widest text-text-main uppercase mb-2">
-            Quick Actions
-          </h4>
-          <p className="text-xs text-text-muted mb-4">
-            Missed policies mean lost commission statements. Use filters to evaluate carrier distribution models.
-          </p>
-          <div className="space-y-2">
-            <div className="p-2.5 bg-background rounded-md border border-border text-xs text-text-muted font-medium hover:border-primary transition-colors cursor-pointer">
-              📊 Export Current Spreadsheet View
-            </div>
-            <div className="p-2.5 bg-background rounded-md border border-border text-xs text-text-muted font-medium hover:border-primary transition-colors cursor-pointer">
-              🔍 Run Batch Expiration Audit
+    <div className="text-right">
+      <p className="text-sm font-medium text-amber-400 font-mono">{policy.date}</p>
+      <p className="text-xs text-text-muted mt-0.5">{policy.premium} PREMIUM</p>
+    </div>
+  </div>
+))
+              )}
             </div>
           </div>
         </div>
