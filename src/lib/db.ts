@@ -1,3 +1,4 @@
+// src/lib/db.ts - Database connection setup using Neon Serverless
 import { neon } from '@neondatabase/serverless';
 
 const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
