@@ -1,7 +1,8 @@
-// Broker Account Interface
+
 export interface BrokerAccount {
-  id: string; // UUID primary key
+  id: string;
   email: string;
+  password_hash: string;
   created_at: Date | string;
   updated_at: Date | string;
 }
@@ -51,3 +52,4 @@ export interface SearchFilters {
   status?: string;      // Selected Coverage Status string
   lob?: string;         // Selected Line of Business type string
 }
+
