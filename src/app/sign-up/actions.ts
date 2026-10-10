@@ -3,9 +3,7 @@
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
-import { neon } from '@neondatabase/serverless';
-
-const sql = neon(process.env.POSTGRES_URL!);
+import { sql } from '@/lib/db';
 
 const SignUpSchema = z.object({
   email: z.string().email('Please enter a valid email address.'),
@@ -38,12 +36,13 @@ export async function signUp(
     };
   }
 
-  const { email, password } = validatedFields.data;
+  const { password } = validatedFields.data;
+  const email = validatedFields.data.email.trim().toLowerCase();
 
   const existingUser = await sql`
     SELECT id
-    FROM broker_accounts
-    WHERE email = ${email}
+    FROM public.broker_account
+    WHERE lower(btrim(email)) = ${email}
     LIMIT 1
   `;
 
@@ -56,7 +55,7 @@ export async function signUp(
   const passwordHash = await bcrypt.hash(password, 10);
 
   await sql`
-    INSERT INTO broker_accounts (email, password_hash)
+    INSERT INTO public.broker_account (email, password_hash)
     VALUES (${email}, ${passwordHash})
   `;
 

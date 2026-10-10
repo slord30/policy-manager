@@ -1,15 +1,13 @@
-import { neon } from '@neondatabase/serverless';
+import { sql } from '@/lib/db';
 import type { BrokerAccount } from '@/types';
-
-const sql = neon(process.env.POSTGRES_URL!);
 
 export async function getUserByEmail(
   email: string,
 ): Promise<BrokerAccount | null> {
   const result = await sql`
     SELECT id, email, password_hash, created_at, updated_at
-    FROM broker_accounts
-    WHERE email = ${email}
+    FROM public.broker_account
+    WHERE lower(btrim(email)) = lower(btrim(${email}))
     LIMIT 1
   `;
 

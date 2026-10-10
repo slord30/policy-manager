@@ -1,5 +1,11 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { signIn } from '@/auth';
+
+export const metadata: Metadata = {
+  title: 'Sign In | PolicyManager',
+  description: 'Sign in to manage your client and policy records.',
+};
 
 export default function SignInPage() {
   return (
@@ -18,7 +24,7 @@ export default function SignInPage() {
             await signIn('credentials', {
               email: formData.get('email'),
               password: formData.get('password'),
-              redirectTo: '/clients',
+              redirectTo: '/dashboard',
             });
           }}
           className="space-y-6"

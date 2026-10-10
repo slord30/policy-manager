@@ -1,30 +1,32 @@
-// src/app/layout.tsx
 import type { Metadata } from 'next';
 import './globals.css';
-import Header from '@/components/Header'; 
+import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { auth } from '@/auth';
+import QuickActionsAside from '@/components/QuickActionsAside';
 
 export const metadata: Metadata = {
   title: 'PolicyManager CRM',
   description: 'Centralized client portfolio management for independent insurance brokers.',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+
   return (
     <html lang="en">
       <body className="min-h-screen flex flex-col antialiased bg-background text-text-main">
-        {/* Unified header wrapper containing your logo and navbar layout */}
         <Header />
-        
-        {/* ADDED: Structural wrapper with maximum layout width and fluid responsive padding */}
-        <main className="flex-1 max-w-7xl w-full mx-auto px-6 sm:px-8 lg:px-12 py-8">
-          {children}
-        </main>
-        
+
+        <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-6 py-8 sm:px-8 md:flex-row lg:px-12">
+          {session?.user && <QuickActionsAside />}
+          <div className="min-w-0 flex-1">{children}</div>
+        </div>
+
         <Footer />
       </body>
     </html>

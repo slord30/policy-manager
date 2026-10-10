@@ -7,9 +7,12 @@ export const authConfig = {
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
+      const pathname = nextUrl.pathname;
       const isOnProtectedRoute =
-        nextUrl.pathname.startsWith('/clients') ||
-        nextUrl.pathname.startsWith('/policies');
+        pathname === '/' ||
+        ['/dashboard', '/client', '/clients', '/policies', '/renewals', '/carriers'].some(
+          (route) => pathname === route || pathname.startsWith(`${route}/`),
+        );
 
       if (isOnProtectedRoute) {
         return isLoggedIn;

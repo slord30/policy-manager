@@ -1,194 +1,198 @@
 'use client';
 
-import { useState } from 'react';
+import Link from 'next/link';
+import { useActionState, useMemo, useState } from 'react';
+import { createPolicy, type PolicyActionState } from './actions';
 
-// Define the Policy interface in English
-interface Policy {
-  id: number;
-  policyNumber: string;
-  clientName: string;
-  carrier: string;
-  lineOfBusiness: string;
-  premium: number;
-  startDate: string;
-  endDate: string;
+const initialPolicyActionState: PolicyActionState = { message: '' };
+
+type PolicyListItem = {
+  id: string;
+  client_id: string;
+  policy_number: string;
+  client_name: string;
+  carrier_name: string;
+  line_of_business: string | null;
+  premium: string;
+  effective_date: string | null;
+  expiration_date: string;
+  status: string;
+};
+
+type ClientOption = { id: string; name: string; email: string | null };
+type CarrierOption = { id: string; name: string };
+
+function formatDate(value: string | null): string {
+  if (!value) return '—';
+  const [year, month, day] = value.slice(0, 10).split('-');
+  return month && day && year ? `${month}/${day}/${year}` : value;
 }
 
-export default function PolicyManager() {
-  const [policies, setPolicies] = useState<Policy[]>([
-    {
-      id: 1,
-      policyNumber: 'POL-2026-001',
-      clientName: 'Juan Pérez',
-      carrier: 'Pacífico',
-      lineOfBusiness: 'Automotive',
-      premium: 1200,
-      startDate: '2026-01-10',
-      endDate: '2027-01-10',
-    },
-  ]);
+function formatPremium(value: string): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(Number(value));
+}
 
-  const [form, setForm] = useState({
-    policyNumber: '',
-    clientName: '',
-    carrier: 'Pacífico',
-    lineOfBusiness: '',
-    premium: '',
-    startDate: '',
-    endDate: '',
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.policyNumber || !form.clientName) return;
-
-    const newPolicy: Policy = {
-      id: Date.now(),
-      policyNumber: form.policyNumber,
-      clientName: form.clientName,
-      carrier: form.carrier,
-      lineOfBusiness: form.lineOfBusiness,
-      premium: Number(form.premium) || 0,
-      startDate: form.startDate,
-      endDate: form.endDate,
-    };
-
-    setPolicies([...policies, newPolicy]);
-    setForm({
-      policyNumber: '',
-      clientName: '',
-      carrier: 'Pacífico',
-      lineOfBusiness: '',
-      premium: '',
-      startDate: '',
-      endDate: '',
+export default function PolicyManager({
+  policies,
+  clients,
+  carriers,
+}: {
+  policies: PolicyListItem[];
+  clients: ClientOption[];
+  carriers: CarrierOption[];
+}) {
+  const [query, setQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const filteredPolicies = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+    return policies.filter((policy) => {
+      const matchesText = !normalized || [policy.policy_number, policy.client_name, policy.carrier_name, policy.line_of_business]
+        .some((value) => value?.toLowerCase().includes(normalized));
+      return matchesText && (statusFilter === 'ALL' || policy.status === statusFilter);
     });
-  };
+  }, [policies, query, statusFilter]);
+  const [state, formAction, pending] = useActionState(
+    createPolicy,
+    initialPolicyActionState,
+  );
 
   return (
-    <main className="p-8 max-w-6xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">Policy Management</h1>
+    <main className="mx-auto max-w-6xl p-8">
+      <h1 className="mb-6 text-3xl font-bold">Policy Management</h1>
 
-      {/* Policy Creation Form */}
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Policy Number</label>
-          <input
-            type="text"
-            value={form.policyNumber}
-            onChange={(e) => setForm({ ...form, policyNumber: e.target.value })}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border"
-            placeholder="e.g. POL-2026-002"
-            required
-          />
+      <section id="new-policy" className="mb-8 rounded-lg bg-white p-6 shadow-md">
+        <h2 className="mb-4 text-xl font-semibold">Add New Policy</h2>
+        {clients.length === 0 && (
+          <p className="mb-4 text-sm text-amber-700">Add a client before creating a policy.</p>
+        )}
+        {carriers.length === 0 && (
+          <p className="mb-4 text-sm text-amber-700">No carriers are available yet. <Link className="underline" href="/carriers">Add a carrier</Link> before creating a policy.</p>
+        )}
+        {carriers.length > 0 && <p className="mb-4 text-sm text-gray-600">Need another carrier? <Link className="underline" href="/carriers">Manage carriers</Link>.</p>}
+
+        <form action={formAction} className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <label htmlFor="policy_number" className="block text-sm font-medium">Policy Number</label>
+            <input id="policy_number" name="policy_number" required maxLength={100} className="mt-1 block w-full rounded-md border p-2" placeholder="e.g. POL-2026-002" />
+            {state.errors?.policy_number && <p className="mt-1 text-sm text-red-600">{state.errors.policy_number[0]}</p>}
+          </div>
+
+          <div>
+            <label htmlFor="client_id" className="block text-sm font-medium">Client</label>
+            <select id="client_id" name="client_id" required defaultValue="" className="mt-1 block w-full rounded-md border p-2">
+              <option value="" disabled>Select a client</option>
+              {clients.map((client) => (
+                <option key={client.id} value={client.id}>{client.name}{client.email ? ` (${client.email})` : ''}</option>
+              ))}
+            </select>
+            {state.errors?.client_id && <p className="mt-1 text-sm text-red-600">{state.errors.client_id[0]}</p>}
+          </div>
+
+          <div>
+            <label htmlFor="carrier_id" className="block text-sm font-medium">Insurance Carrier</label>
+            <select id="carrier_id" name="carrier_id" required defaultValue="" className="mt-1 block w-full rounded-md border p-2">
+              <option value="" disabled>Select a carrier</option>
+              {carriers.map((carrier) => <option key={carrier.id} value={carrier.id}>{carrier.name}</option>)}
+            </select>
+            {state.errors?.carrier_id && <p className="mt-1 text-sm text-red-600">{state.errors.carrier_id[0]}</p>}
+          </div>
+
+          <div>
+            <label htmlFor="line_of_business" className="block text-sm font-medium">Line of Business</label>
+            <input id="line_of_business" name="line_of_business" required maxLength={100} className="mt-1 block w-full rounded-md border p-2" placeholder="e.g. Auto, Home, Life" />
+            {state.errors?.line_of_business && <p className="mt-1 text-sm text-red-600">{state.errors.line_of_business[0]}</p>}
+          </div>
+
+          <div>
+            <label htmlFor="premium" className="block text-sm font-medium">Premium (USD)</label>
+            <input id="premium" name="premium" type="number" min="0" max="9999999999.99" step="0.01" required className="mt-1 block w-full rounded-md border p-2" placeholder="0.00" />
+            {state.errors?.premium && <p className="mt-1 text-sm text-red-600">{state.errors.premium[0]}</p>}
+          </div>
+
+          <div>
+            <label htmlFor="status" className="block text-sm font-medium">Status</label>
+            <select id="status" name="status" defaultValue="ACTIVE" className="mt-1 block w-full rounded-md border p-2">
+              <option value="ACTIVE">Active</option>
+              <option value="PENDING">Pending</option>
+              <option value="EXPIRED">Expired</option>
+              <option value="CANCELLED">Cancelled</option>
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="effective_date" className="block text-sm font-medium">Effective Date</label>
+            <input id="effective_date" name="effective_date" type="date" required className="mt-1 block w-full rounded-md border p-2" />
+            {state.errors?.effective_date && <p className="mt-1 text-sm text-red-600">{state.errors.effective_date[0]}</p>}
+          </div>
+
+          <div>
+            <label htmlFor="expiration_date" className="block text-sm font-medium">Expiration Date</label>
+            <input id="expiration_date" name="expiration_date" type="date" required className="mt-1 block w-full rounded-md border p-2" />
+            {state.errors?.expiration_date && <p className="mt-1 text-sm text-red-600">{state.errors.expiration_date[0]}</p>}
+          </div>
+
+          <div className="md:col-span-2">
+            <label htmlFor="notes" className="block text-sm font-medium">Notes</label>
+            <textarea id="notes" name="notes" maxLength={5000} rows={3} className="mt-1 block w-full rounded-md border p-2" />
+            {state.errors?.notes && <p className="mt-1 text-sm text-red-600">{state.errors.notes[0]}</p>}
+          </div>
+
+          <div className="md:col-span-2 flex items-center justify-between">
+            <p className="text-sm text-gray-600" aria-live="polite">{state.message}</p>
+            <button type="submit" disabled={pending || clients.length === 0 || carriers.length === 0} className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-60">
+              {pending ? 'Saving…' : 'Save Policy'}
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section className="overflow-hidden rounded-lg bg-white shadow-md">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b bg-gray-50 p-4">
+          <h2 className="text-xl font-semibold">Policies</h2>
+          <div className="flex flex-wrap gap-2">
+            <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search policies" placeholder="Search policy, client, carrier" className="rounded-md border p-2" />
+            <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} aria-label="Filter policies by status" className="rounded-md border p-2">
+              <option value="ALL">All statuses</option><option value="ACTIVE">Active</option><option value="PENDING">Pending</option><option value="EXPIRED">Expired</option><option value="CANCELLED">Cancelled</option>
+            </select>
+          </div>
         </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Client Name</label>
-          <input
-            type="text"
-            value={form.clientName}
-            onChange={(e) => setForm({ ...form, clientName: e.target.value })}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border"
-            placeholder="e.g. Maria Gomez"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Insurance Carrier</label>
-          <select
-            value={form.carrier}
-            onChange={(e) => setForm({ ...form, carrier: e.target.value })}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border"
-          >
-            <option value="Pacífico">Pacífico</option>
-            <option value="Rímac">Rímac</option>
-            <option value="Mapfre">Mapfre</option>
-            <option value="La Positiva">La Positiva</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Line of Business</label>
-          <input
-            type="text"
-            value={form.lineOfBusiness}
-            onChange={(e) => setForm({ ...form, lineOfBusiness: e.target.value })}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border"
-            placeholder="e.g. Automotive, Health, Life"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Premium</label>
-          <input
-            type="number"
-            value={form.premium}
-            onChange={(e) => setForm({ ...form, premium: e.target.value })}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border"
-            placeholder="0.00"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Start Date</label>
-          <input
-            type="date"
-            value={form.startDate}
-            onChange={(e) => setForm({ ...form, startDate: e.target.value })}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">End Date</label>
-          <input
-            type="date"
-            value={form.endDate}
-            onChange={(e) => setForm({ ...form, endDate: e.target.value })}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border"
-          />
-        </div>
-
-        <div className="md:col-span-2 flex justify-end">
-          <button
-            type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-          >
-            Register Policy
-          </button>
-        </div>
-      </form>
-
-      {/* Policies List Table */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <h2 className="text-xl font-semibold p-4 bg-gray-50 border-b">Registered Policies</h2>
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Policy No.</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Client</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Carrier</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Line of Business</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Premium</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Term</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {policies.map((p) => (
-              <tr key={p.id}>
-                <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{p.policyNumber}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-500">{p.clientName}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-500">{p.carrier}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-500">{p.lineOfBusiness}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-500">${p.premium}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-500">{p.startDate} to {p.endDate}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+        {policies.length === 0 ? (
+          <p className="p-6 text-gray-600">No policies yet. Add a policy above to get started.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Policy No.</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Client</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Carrier</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Line of Business</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Premium</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Term</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 bg-white">
+                {filteredPolicies.map((policy) => (
+                  <tr key={policy.id} className="text-sm">
+                    <td className="whitespace-nowrap px-6 py-4 font-medium"><Link className="underline" href={`/policies/${policy.id}`}>{policy.policy_number}</Link></td>
+                    <td className="whitespace-nowrap px-6 py-4"><Link className="underline" href={`/client/${policy.client_id}`}>{policy.client_name}</Link></td>
+                    <td className="whitespace-nowrap px-6 py-4">{policy.carrier_name}</td>
+                    <td className="whitespace-nowrap px-6 py-4">{policy.line_of_business || '—'}</td>
+                    <td className="whitespace-nowrap px-6 py-4">{formatPremium(policy.premium)}</td>
+                    <td className="whitespace-nowrap px-6 py-4">{formatDate(policy.effective_date)} – {formatDate(policy.expiration_date)}</td>
+                    <td className="whitespace-nowrap px-6 py-4">{policy.status.replaceAll('_', ' ')}</td>
+                  </tr>
+                ))}
+                {filteredPolicies.length === 0 && <tr><td colSpan={7} className="p-6 text-gray-600">No policies match those filters.</td></tr>}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
     </main>
   );
 }
