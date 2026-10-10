@@ -1,5 +1,11 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { signIn } from '@/auth';
+
+export const metadata: Metadata = {
+  title: 'Sign In | PolicyManager',
+  description: 'Sign in to manage your client and policy records.',
+};
 
 export default function SignInPage() {
   return (

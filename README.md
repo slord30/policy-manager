@@ -35,6 +35,12 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
+## Security and future work
+
+This is currently a school project using fictional records. Before using it with real insurance or client information, review and strengthen authentication, authorization, data handling, deployment settings, and applicable security requirements. The current carrier catalog is shared across broker accounts, so its management permissions also need review before real-world use.
+
+A future version may add a client sign-in portal so clients can securely view their own profile and policies without contacting their broker for every routine question. That would require its own identity, authorization, privacy, and security review.
+
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More

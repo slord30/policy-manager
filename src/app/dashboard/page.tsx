@@ -1,6 +1,13 @@
 // src/app/dashboard/page.tsx
+import type { Metadata } from 'next';
+import Link from 'next/link';
 import StatCard from '@/components/StatCard';
 import { getDashboardMetrics, getUpcomingRenewals } from './actions';
+
+export const metadata: Metadata = {
+  title: 'Dashboard | PolicyManager',
+  description: 'Review your client portfolio and upcoming policy renewals.',
+};
 
 // Declare the type structure matching your SQL select columns
 interface UpcomingRenewalPolicy {
@@ -64,9 +71,14 @@ export default async function DashboardPage() {
         <div className="lg:col-span-2">
           <div className="bg-surface border border-border rounded-xl overflow-hidden shadow-xs">
             <div className="px-6 py-4 border-b border-border bg-slate-900/20">
-              <h3 className="text-sm font-bold tracking-wider text-text-main uppercase">
-                CRITICAL UPCOMING RENEWALS
-              </h3>
+              <div className="flex items-center justify-between gap-4">
+                <h3 className="text-sm font-bold tracking-wider text-text-main uppercase">
+                  UPCOMING RENEWALS
+                </h3>
+                <Link href="/renewals" className="text-xs font-medium text-primary underline">
+                  View all
+                </Link>
+              </div>
             </div>
             <div className="divide-y divide-border">
               {upcomingRenewals.length === 0 ? (
@@ -75,7 +87,7 @@ export default async function DashboardPage() {
                 </div>
               ) : (
                 upcomingRenewals.map((policy) => (
-                  <div key={policy.id} className="p-4 flex items-center justify-between hover:bg-slate-900/10 transition-colors">
+                    <Link key={policy.id} href={`/policies/${policy.id}`} className="p-4 flex items-center justify-between hover:bg-slate-900/10 transition-colors">
                     <div>
                       <p className="text-sm font-semibold text-text-main">{policy.client}</p>
                       <div className="flex gap-2 text-xs text-text-muted mt-0.5">
@@ -83,7 +95,7 @@ export default async function DashboardPage() {
                         <span>•</span>
                         <span>#{policy.policyNum}</span>
                       </div>
-                    </div>
+                    </Link>
                     <div className="text-right">
                       <p className="text-sm font-medium text-amber-400 font-mono">{policy.date}</p>
                       <p className="text-xs text-text-muted mt-0.5">{policy.premium} PREMIUM</p>

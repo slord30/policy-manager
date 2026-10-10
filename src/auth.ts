@@ -8,6 +8,16 @@ import { getUserByEmail } from '@/lib/auth-db';
 
 export const { auth, signIn, signOut, handlers } = NextAuth({
   ...authConfig,
+  callbacks: {
+    ...authConfig.callbacks,
+    session({ session, token }) {
+      if (session.user && token.sub) {
+        session.user.id = token.sub;
+      }
+
+      return session;
+    },
+  },
 
   providers: [
     Credentials({

@@ -20,9 +20,9 @@ export default function Header() {
 
         {/* Action Button */}
         <div>
-          <button className="bg-primary hover:bg-opacity-90 text-white px-4 py-2 rounded-md text-sm font-medium transition-all shadow-xs cursor-pointer uppercase tracking-wider">
+          <Link href="/policies#new-policy" className="bg-primary hover:bg-opacity-90 text-white px-4 py-2 rounded-md text-sm font-medium transition-all shadow-xs cursor-pointer uppercase tracking-wider">
             Add New Policy
-          </button>
+          </Link>
         </div>
       </div>
     </header>

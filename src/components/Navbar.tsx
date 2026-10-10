@@ -8,9 +8,10 @@ export default function Navbar() {
   const pathname = usePathname();
 
   const links = [
-    { name: 'DASHBOARD', href: '/' },
+    { name: 'DASHBOARD', href: '/dashboard' },
     { name: 'CLIENTS', href: '/clients' },
     { name: 'POLICIES', href: '/policies' },
+    { name: 'CARRIERS', href: '/carriers' },
     { name: 'RENEWALS', href: '/renewals' },
   ];
 
