@@ -1,3 +1,4 @@
+// src/components/Header.tsx
 import Link from 'next/link';
 import { auth } from '@/auth';
 import Navbar from './Navbar';
@@ -8,16 +9,20 @@ export default async function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-surface">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4">
+      {/* RESPONSIVE FIX: Changed px-6 to px-4 on mobile and added flex-wrap & gap-4 */}
+      <div className="mx-auto flex max-w-7xl items-center justify-between flex-wrap gap-4 px-4 py-4 sm:px-6">
         <Link href="/" className="flex items-center space-x-2">
-          <span className="text-xl font-bold uppercase tracking-widest text-primary">
+          {/* Scaled text from text-xl down to text-lg on tight screens so it never clips */}
+          <span className="text-lg sm:text-xl font-bold uppercase tracking-widest text-primary whitespace-nowrap">
             POLICYMANAGER
           </span>
         </Link>
 
-        <Navbar />
-
-        {session?.user && <SignOutButton />}
+        {/* This wrapper element naturally moves into position using your responsive hamburger code */}
+        <div className="flex items-center space-x-4">
+          <Navbar />
+          {session?.user && <SignOutButton />}
+        </div>
       </div>
     </header>
   );
