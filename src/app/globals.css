@@ -24,6 +24,10 @@
   --color-text-main: var(--color-text-main);
   --color-text-muted: var(--color-text-muted);
   --color-border: var(--color-border);
+
+/* Automatic blue override: Forces all default Tailwind blue-600 utility hooks to use your dark navy */
+  --color-blue-600: #1e3a8a;
+  --color-blue-700: #12255c
 }
 
 body {
